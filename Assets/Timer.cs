@@ -10,6 +10,9 @@ public class Timer : MonoBehaviour
     [SerializeField] AudioSource audioSource;           //alarm sound
     [SerializeField] Text timerText;                    //timer's countdown text field
 
+    [SerializeField] Toggle repositionTime;
+    public bool useRepositionTime = true;
+    
     public void StartTimer (float sec)                  //getting seconds from the corresponding button
     {
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
@@ -18,6 +21,13 @@ public class Timer : MonoBehaviour
         StartCoroutine("TimerText", sec);
     }
 
+    public void ToggleRepositionTime()                  //reposiiton Toggle
+    {
+        if (repositionTime.isOn)
+            useRepositionTime = true;
+        else
+            useRepositionTime = false;
+    }
 
     IEnumerator TimerText(float s)
     {
@@ -39,7 +49,16 @@ public class Timer : MonoBehaviour
                 sound = false;                          //preventing sound to play again
             }
 
-            if (_inputSeconds < 0)              
+            if (_inputSeconds < 0 && useRepositionTime)  //if we have reposition on adding 5 sec            
+            {                                            //between timers
+                _inputSeconds = 5;
+                for (int i = 0; i < _inputSeconds; i++)
+                {
+                    yield return new WaitForSecondsRealtime(1);
+                }
+                _inputSeconds = s;                      //setting number of seconds to initial value
+                sound = true;                           //and enabling sounds
+            } else if (_inputSeconds < 0)
             {
                 _inputSeconds = s;                      //setting number of seconds to initial value
                 sound = true;                           //and enabling sounds
@@ -56,6 +75,7 @@ public class Timer : MonoBehaviour
     {
 
         StopAllCoroutines();
+        timerText.text = "0' 00\"";
     }
 
     public void ExitApp()
